@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formateador de listas</title>
+  <style>
+    body { font-family: sans-serif; background:#f9fafb; color:#111; margin:20px; }
+    h1 { font-size:20px; }
+    textarea, input, select { width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; font-family:monospace; }
+    textarea { height:200px; resize:vertical; }
+    .grid { display:grid; gap:12px; margin:12px 0; }
+    .col2 { grid-template-columns:1fr 1fr; }
+    button { padding:8px 14px; border:none; border-radius:8px; cursor:pointer; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+    button:hover { background:#f0f0f0; }
+    .box { background:#fff; padding:12px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <h1>Formateador de listas</h1>
+
+  <label>Pega tu lista:</label>
+  <textarea id="input"></textarea>
+
+  <div class="grid col2">
+    <div>
+      <label>Delimitador de entrada:</label>
+      <input id="delimiter" value="\n" />
+    </div>
+    <div>
+      <label>Separador de salida:</label>
+      <input id="separator" value=",\n" />
+    </div>
+  </div>
+
+  <div class="grid col2">
+    <div>
+      <label>Prefijo por línea:</label>
+      <input id="itemPrefix" value="" />
+    </div>
+    <div>
+      <label>Sufijo por línea:</label>
+      <input id="itemSuffix" value="" />
+    </div>
+  </div>
+
+  <div class="grid col2">
+    <div>
+      <label>Prefijo de grupo:</label>
+      <input id="groupPrefix" value="[\n" />
+    </div>
+    <div>
+      <label>Sufijo de grupo:</label>
+      <input id="groupSuffix" value="\n]" />
+    </div>
+  </div>
+
+  <div class="grid col2">
+    <div>
+      <label><input type="checkbox" id="quoteItems" checked /> Usar comillas</label>
+    </div>
+    <div>
+      <label>Tipo de comilla:</label>
+      <select id="quoteChar">
+        <option value='"'>" (doble)</option>
+        <option value="'">' (simple)</option>
+        <option value="`">` (invertida)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid col2">
+    <label><input type="checkbox" id="trim" checked /> Quitar espacios</label>
+    <label><input type="checkbox" id="removeEmpty" checked /> Quitar vacíos</label>
+    <label><input type="checkbox" id="unique" /> Quitar duplicados</label>
+    <label><input type="checkbox" id="sortItems" /> Ordenar</label>
+  </div>
+
+  <div class="grid col2">
+    <button onclick="loadExample()">Cargar ejemplo</button>
+    <button onclick="clearAll()">Vaciar</button>
+  </div>
+
+  <div class="box">
+    <h3>Salida</h3>
+    <div class="grid col2">
+      <button onclick="formatList()">Formatear</button>
+      <button onclick="copyResult()">Copiar</button>
+    </div>
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <script>
+    function formatList() {
+      const input = document.getElementById('input').value;
+      const delimiter = document.getElementById('delimiter').value === '\\n' ? '\n' : document.getElementById('delimiter').value;
+      const separator = document.getElementById('separator').value.replace(/\\n/g, '\n');
+      const itemPrefix = document.getElementById('itemPrefix').value;
+      const itemSuffix = document.getElementById('itemSuffix').value;
+      const groupPrefix = document.getElementById('groupPrefix').value.replace(/\\n/g, '\n');
+      const groupSuffix = document.getElementById('groupSuffix').value.replace(/\\n/g, '\n');
+      const quoteItems = document.getElementById('quoteItems').checked;
+      const quoteChar = document.getElementById('quoteChar').value;
+      const trim = document.getElementById('trim').checked;
+      const removeEmpty = document.getElementById('removeEmpty').checked;
+      const unique = document.getElementById('unique').checked;
+      const sortItems = document.getElementById('sortItems').checked;
+
+      let items = delimiter === '\n' ? input.split(/\r?\n/) : input.split(delimiter);
+      if (trim) items = items.map(s => s.trim());
+      if (removeEmpty) items = items.filter(s => s.length > 0);
+      if (unique) items = Array.from(new Set(items));
+      if (sortItems) items = items.sort();
+
+      const q = quoteItems ? quoteChar : "";
+      const rendered = items.map(s => `${itemPrefix}${q}${s}${q}${itemSuffix}`).join(separator);
+      document.getElementById('output').value = groupPrefix + rendered + groupSuffix;
+    }
+
+    function copyResult() {
+      const out = document.getElementById('output').value;
+      if (!out) return alert("Primero pulsa Formatear.");
+      navigator.clipboard.writeText(out)
+        .then(() => alert("Copiado al portapapeles"))
+        .catch(() => alert("No se pudo copiar automáticamente."));
+    }
+
+    function loadExample() {
+      document.getElementById('input').value = "000201017\n000201018\n000201020\n000201023";
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = "";
+      document.getElementById('output').value = "";
+    }
+  </script>
+</body>
+</html>
