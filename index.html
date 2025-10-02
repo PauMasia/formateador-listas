@@ -119,9 +119,7 @@
     function copyResult() {
       const out = document.getElementById('output').value;
       if (!out) return alert("Primero pulsa Formatear.");
-      navigator.clipboard.writeText(out)
-        .then(() => alert("Copiado al portapapeles"))
-        .catch(() => alert("No se pudo copiar automáticamente."));
+      navigator.clipboard.writeText(out);
     }
 
     function loadExample() {
@@ -135,3 +133,4 @@
   </script>
 </body>
 </html>
+
